@@ -119,7 +119,7 @@ class BlogController
         // 开启缓冲区
         ob_start();
 
-        // 生成静态页
+      // 生成静态页
         foreach($blogs as $v)
         {
             // 加载视图
