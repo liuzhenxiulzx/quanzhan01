@@ -5,7 +5,7 @@ class IndexController
 {
     public function index()
     {
-        echo 'index';
+        echo '欢迎来到我的框架';
     }
 }
 
