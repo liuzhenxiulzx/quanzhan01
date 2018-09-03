@@ -26,6 +26,18 @@ class BlogController
         $blog->index2html();
     }
 
+    public function display(){
+        // 接收日志Id
+        $id = (int)$_GET['id'];
+        $blog = new Blog;
+        echo $blog->getDisplay($id);
+    }
+
+    public function displayToDb(){
+        $blog = new Blog;
+        $blog ->displayToDb();
+    }
+
     public function update_display(){
         //接收日志ID
         $id = (int)$_GET['id'];
@@ -57,4 +69,6 @@ class BlogController
             echo $display;
         }
     }
+
+
 }
