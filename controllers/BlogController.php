@@ -43,11 +43,12 @@ class BlogController
         $id = (int)$_GET['id'];
         // 连接redis
         // 连接 Redis
-        $redis = new \Predis\Client([
-            'scheme' => 'tcp',
-            'host'   => '127.0.0.1',
-            'port'   => 32768,
-        ]);
+        // $redis = new \Predis\Client([
+        //     'scheme' => 'tcp',
+        //     'host'   => '127.0.0.1',
+        //     'port'   => 32768,
+        // ]);
+        $redis = \libs\Redis::getredis();
 
         // 判断 blog_displays 这个 hash 中有没有一个键是 blog-$id 
         $key = "blog-{$id}";   // 拼出日志的键

@@ -4,17 +4,8 @@
     use PDO;
     
     
-    class Blog
+    class Blog extends Base
     {
-        // 保存PDO
-        public $pdo;
-
-        public function  __construct()
-        {
-            // 取日志的数据
-            $this->pdo = new PDO('mysql:host=127.0.0.1;dbname=blog','root','');
-            $this->pdo->exec('SET NAMES UTF8');
-        }
 
         // 日志列表
         public function search()
@@ -85,7 +76,7 @@
     
             // 制作按钮
             // 取出总的记录数
-            $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM blog WHERE $where");
+            $stmt = self::$pdo->prepare("SELECT COUNT(*) FROM blog WHERE $where");
             $stmt->execute($value);
             $count = $stmt->fetch( PDO::FETCH_COLUMN );
             // 计算总的页数（ceil：向上取整（天花板）， floor：向下取整（地板））
@@ -104,7 +95,7 @@
     
             /*************** 执行 sqL */
             // 预处理 SQL
-            $stmt = $this->pdo->prepare("SELECT * FROM blog WHERE $where ORDER BY $odby $odway LIMIT $offset,$perpage");
+            $stmt = self::$pdo->prepare("SELECT * FROM blog WHERE $where ORDER BY $odby $odway LIMIT $offset,$perpage");
             // 执行 SQL
             $stmt->execute($value);
     
@@ -125,7 +116,7 @@
             // $pdo = new PDO('mysql:host=127.0.0.1;dbname=blog','root','');
             // $pdo->exec('SET NAMES UTF8');
 
-            $stmt = $this->pdo->query('SELECT * FROM blog');
+            $stmt = self::$pdo->query('SELECT * FROM blog');
             $blogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // 开启缓冲区
@@ -152,7 +143,7 @@
         public function index2html()
         {
             // 取前20条记录数据
-            $stmt = $this->pdo->query("SELECT * FROM blog WHERE is_show=1 ORDER BY id DESC LIMIT 20");
+            $stmt = self::$pdo->query("SELECT * FROM blog WHERE is_show=1 ORDER BY id DESC LIMIT 20");
             $blogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // 开启一个缓冲区
@@ -177,11 +168,12 @@
             $key = "blog-{$id}";
 
             // 连接redis
-            $redis = new \Predis\Client([
-                'scheme'=>'tcp',
-                'host'=>'127.0.0.1',
-                'port'=>32768,
-            ]);
+            // $redis = new \Predis\Client([
+            //     'scheme'=>'tcp',
+            //     'host'=>'127.0.0.1',
+            //     'port'=>32768,
+            // ]);
+            $redis = \libs\Redis::getredis();
 
             // 判断hash 中是否有这个键，如果有就操作内存，如果没有就从数据库中取
             if($redis->hexists('blog_displays',$key)){
@@ -190,7 +182,7 @@
                 return $newNum;
             }else{
                 // 从数据库中取出浏览量
-                $stmt = $this->pdo->prepare('select display from blog where id =?');
+                $stmt = self::$pdo->prepare('select display from blog where id =?');
                 $stmt->execute([$id]);
                 $display = $stmt->fetch(PDO::FETCH_COLUMN);
                 $display++;
@@ -205,12 +197,14 @@
             {
                 // 1. 先取出内存中所有的浏览量
                 // 连接 Redis
-                $redis = new \Predis\Client([
-                    'scheme' => 'tcp',
-                    'host'   => '127.0.0.1',
-                    'port'   => 32768,
-                ]);
+                // $redis = new \Predis\Client([
+                //     'scheme' => 'tcp',
+                //     'host'   => '127.0.0.1',
+                //     'port'   => 32768,
+                // ]);
 
+                $redis = \libs\Redis::getredis();
+                
                 $data = $redis->hgetall('blog_displays');
 
                 // 2. 更新回数据库
@@ -218,7 +212,7 @@
                 {
                     $id = str_replace('blog-', '', $k);
                     $sql = "UPDATE blog SET display={$v} WHERE id = {$id}";
-                    $this->pdo->exec($sql);
+                    self::$pdo->exec($sql);
                 }
             }
     }
