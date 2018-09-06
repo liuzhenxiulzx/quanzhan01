@@ -118,6 +118,22 @@ function config($name){
     
     return $config[$name];
 }
+// xss 攻击 的封装
+function e($content)
+{
+    return htmlspecialchars($content);
+}
+
+
+// csrf 
+ function csrf(){
+    if(!isset($_SESSION['token'])){
+        // 生成一个随机的字符串
+        $token = md5( rand(1,99999) . microtime() );
+        $_SESSION['token']=$token;
+    }
+    return $_SESSION['token'];
+}
 
 
 ?>
