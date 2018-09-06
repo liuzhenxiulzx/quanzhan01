@@ -5,6 +5,10 @@ use models\Blog;
 
 class BlogController
 {
+    // 写日志
+    public function create(){
+        view('blogs.create');
+    }
     // 日志列表
     public function index()
     {

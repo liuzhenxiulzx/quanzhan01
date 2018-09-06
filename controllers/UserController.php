@@ -35,9 +35,10 @@ class UserController
 
         // 生成激活码
         $code = md5(rand(1,99999));
-
+        // echo $code;
+        
         // 保存到redis中
-        $redis = \libs\Redis::getInstance();
+        $redis = \libs\Redis::getredis();
 
         // 序列化
         $value = json_encode([
@@ -60,17 +61,14 @@ class UserController
         // 3.把消息放到队列中
         // 从邮箱地址中取出姓名  fortheday @ 126.com    fortheday
         $name = explode('@',$email);
+        // echo "<pre>";
+        // var_dump($name);
         // echo $name;
         // 构造收件地址
         $from = [$email,$name[0]];
+        // echo "<pre>";
+        // var_dump($from);
        // 构造消息数组
-
-        // $message = [
-        //     'title' => '欢迎加入全栈1班',
-        //     'content' => "点击以下链接进行激活：<br> <a href=''>点击激活</a>。",
-        //     'from' => $from,
-        // ];
-
         $message = [
             'title' => '智聊系统-账号激活',
             'content' => "点击以下链接进行激活：<br> 点击激活：
@@ -79,32 +77,15 @@ class UserController
             如果按钮不能点击，请复制上面链接地址，在浏览器中访问来激活账号！</p>",
             'from' => $from,
         ];
+        // var_dump($message);
         // 把消息转成字符串(JSON ==> 序列化)
-        $message = json_encode($message);
+      $message = json_encode($message);
 
         // 放到队列中
-        // $redis = new \Predis\Client([
-        //     'scheme' => 'tcp',
-        //     'host'   => '127.0.0.1',
-        //     'port'   => 32768,
-        // ]);
-        $redis = \libs\Redis::getInstance();
+        $redis = \libs\Redis::getredis();
         $redis->lpush('email', $message);
 
         echo 'ok';
-
-
-        // 3.发邮件
-        // $mail = new \libs\Mail;
-        // $content = "恭喜你，注册成功";
-        // // 从邮箱地址中取出姓名  fortheday @ 126.com    fortheday
-        // $name = explode('@',$email);
-        // // 构造收件地址
-        // $from = [$email,$name[0]];
-        // // 发邮件
-        // $mail->send('注册成功',$content,$from);
-
-        // echo "ok";
 
     }
 
@@ -114,11 +95,13 @@ class UserController
         $code = $_GET['code'];
 
         // 2. 到 Redis 取出账号
-        $redis = \libs\Redis::getInstance();
+        $redis = \libs\Redis::getredis();
         // 拼出名字
         $key = 'temp_user:'.$code;
+        // var_dump($key);
         // 取出数据
         $data = $redis->get($key);
+        // var_dump($data);
         // 判断有没有
         if($data)
         {
@@ -139,11 +122,20 @@ class UserController
     }
 
       // 登录
-      public function login(){
+    public function login(){
         view('users.login');
     }
     
-    
+    public function dologin(){
+        $email = $_POST['email'];
+        $password = md5($_POST['password']);
+        $user = new \models\User;
+        if($user->login($email,$password)){
+            echo "登录成功";
+        }else{
+            echo "密码或邮箱错误";
+        }
+    }
 
     
 }

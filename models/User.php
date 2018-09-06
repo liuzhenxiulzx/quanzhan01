@@ -18,8 +18,23 @@ class User extends Base
                             ]);
     }
 
+// 登录
+    public function login($email,$password){
+        $stmt = self::$pdo->prepare("select * from users where email = ? and password = ?");
+        $stmt->execute([
+            $email,
+            $password
+        ]);
 
-
+        $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+        if($user){
+            $_SESSION['id']=$user['id'];
+            $_SESSION['email'] = $user['email'];
+            return true;
+        }else{
+            return false;
+        }
+    }
 
 
 
