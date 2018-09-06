@@ -44,12 +44,6 @@ class BlogController
         //接收日志ID
         $id = (int)$_GET['id'];
         // 连接redis
-        // 连接 Redis
-        // $redis = new \Predis\Client([
-        //     'scheme' => 'tcp',
-        //     'host'   => '127.0.0.1',
-        //     'port'   => 32768,
-        // ]);
         $redis = \libs\Redis::getredis();
 
         // 判断 blog_displays 这个 hash 中有没有一个键是 blog-$id 
@@ -72,6 +66,24 @@ class BlogController
             echo $display;
         }
     }
+    // 发表日志
+    public function write(){
+        $title = $_POST['title'];
+        $content = $_POST['content'];
+        $is_show = $_POST['is_show'];
 
+        $blog = new Blog;
+        $blog -> dowrite($title,$content,$is_show);
+        // 跳转
+        messaage('发表成功',2,'/blog/index');
+    }
+
+    // 删除日志
+    public function delete(){
+        $id = $_GET['id'];
+        $blog = new Blog;
+        $blog->delete($id);
+        message('删除成功',2,'/blog/index');
+    }
 
 }

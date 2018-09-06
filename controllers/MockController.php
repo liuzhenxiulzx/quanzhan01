@@ -15,8 +15,10 @@
             {
                 $email = rand(50000,99999999999).'@126.com';
                 $password = md5('123123');
+                $date = rand(1233333399,1535592288);
+                $date = date('y-m-d H:i:s',$date);
                 
-               $a = $pdo->exec("INSERT INTO users (email,password) VALUES ('$email','$password')");
+               $a = $pdo->exec("INSERT INTO users (email,password,created_at) VALUES ('$email','$password','$date')");
             }
         }
 

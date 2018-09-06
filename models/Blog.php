@@ -16,6 +16,7 @@
     
             // 设置的 $where
             $where = 1;
+            // $where = 'user_id='.$_SESSION['id'];
     
             // 放预处理对应的值
             $value = [];
@@ -215,5 +216,15 @@
                     self::$pdo->exec($sql);
                 }
             }
+
+        // 删除日志
+        public function delete($id){
+            // 只能删除自己的日志
+            $stmt = self::$pdo->prepare('DELETE FROM blog WHERE id = ? AND user_id = ?');
+            $stmt->execute([
+                $id,
+                $_SESSION['id'],
+            ]);
+        }
     }
 ?>
