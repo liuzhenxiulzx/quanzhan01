@@ -23,6 +23,7 @@ class UserController
         echo 'world';
     }
 
+    // 注册
     public function regist(){
         view('users.add');
     }
@@ -137,6 +138,12 @@ class UserController
         }
     }
 
+      // 登录
+      public function login(){
+        view('users.login');
+    }
+    
+    
 
     
 }

@@ -11,8 +11,6 @@ class BlogController
        $blog = new Blog;
        $data = $blog->search();
        
-        //   加载视图
-        View('blogs.index',$data);
     }
 
     public function content_to_html()
