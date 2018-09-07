@@ -131,12 +131,24 @@ class UserController
         $password = md5($_POST['password']);
         $user = new \models\User;
         if($user->login($email,$password)){
-            echo "登录成功";
+            // header('Location:/blog/index');
+            message('登录成功',2,'/blog/index');
         }else{
-            echo "密码或邮箱错误";
+            message('密码或邮箱错误',1,'/user/login');
         }
     }
 
+    //退出
+    public function logout(){
+        $_SESSION = [];
+        // die('退出成功！');
+        // view('common.success', [
+        //     'message' => '退出成功！',
+        //     'url' => '/blog/index',
+        //     'seconds' => '3'
+        // ]);
+        message('退出成功！',0,'/blog/index');
+    }
     
 }
 ?>

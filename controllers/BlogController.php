@@ -8,7 +8,7 @@ class BlogController
     // 写日志
     public function create(){
         
-        view('blogs.create');
+        view('blogs.write');
     }
     // 日志列表
     public function index()
@@ -74,17 +74,62 @@ class BlogController
         $is_show = $_POST['is_show'];
 
         $blog = new Blog;
-        $blog -> dowrite($title,$content,$is_show);
+        $id = $blog -> dowrite($title,$content,$is_show);
+        
+        // 如果日志是公开的就生成静态页
+        if($is_show == 1)
+        {
+            $blog->makeHtml($id);
+        }
+
         // 跳转
-        messaage('发表成功',2,'/blog/index');
+        message('发表成功',2,'/blog/index');
     }
 
     // 删除日志
     public function delete(){
-        $id = $_GET['id'];
+        $id = $_POST['id'];
         $blog = new Blog;
         $blog->delete($id);
+
+        // 静态页删除掉
+        $blog->deleteHtml($id);
         message('删除成功',2,'/blog/index');
     }
 
+    // 1.修改日志
+    public function edit(){
+        // 获取日志ID
+        $id = $_GET['id'];
+        $blog = new Blog;
+        $data = $blog->find($id);
+
+        view('blogs.edit',[
+            'data'=>$data,
+        ]);
+
+    }
+// 2.
+    public function update(){
+        $title = $_POST['title'];
+        $content = $_POST['content'];
+        $is_show = $_POST['is_show'];
+        $id = $_POST['id'];
+
+        $blog = new Blog;
+        $data = $blog->update($title,$content,$is_show,$id);
+
+        // 如果日志是公开的就生成静态页
+        if($is_show == 1)
+        {
+            $blog->makeHtml($id);
+        }
+        else
+        {
+            // 如果改为私有，就要将原来的静态页删除掉
+            $blog->deleteHtml($id);
+        }
+
+        message('修改成功',0,'/blog/index');
+    }
 }

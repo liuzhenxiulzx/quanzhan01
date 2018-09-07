@@ -14,9 +14,15 @@
             // $pdo = new PDO('mysql:host=127.0.0.1;dbname=blog','root','');
             // $pdo->exec('SET NAMES UTF8');
     
-            // 设置的 $where
-            $where = 1;
-            // $where = 'user_id='.$_SESSION['id'];
+            // 设置的 $where 取出所有日志
+            // $where = 1;
+            // 只取出自己的日志
+            if(isset($_SESSION['id'])){
+                $where = 'user_id='.$_SESSION['id'];
+            }else{
+                $where = 1;
+            }
+            
     
             // 放预处理对应的值
             $value = [];
@@ -169,11 +175,6 @@
             $key = "blog-{$id}";
 
             // 连接redis
-            // $redis = new \Predis\Client([
-            //     'scheme'=>'tcp',
-            //     'host'=>'127.0.0.1',
-            //     'port'=>32768,
-            // ]);
             $redis = \libs\Redis::getredis();
 
             // 判断hash 中是否有这个键，如果有就操作内存，如果没有就从数据库中取
@@ -198,12 +199,6 @@
             {
                 // 1. 先取出内存中所有的浏览量
                 // 连接 Redis
-                // $redis = new \Predis\Client([
-                //     'scheme' => 'tcp',
-                //     'host'   => '127.0.0.1',
-                //     'port'   => 32768,
-                // ]);
-
                 $redis = \libs\Redis::getredis();
                 
                 $data = $redis->hgetall('blog_displays');
@@ -226,5 +221,82 @@
                 $_SESSION['id'],
             ]);
         }
+        
+        // 写日志
+        public  function dowrite($title,$content,$is_show){
+            $stmt = self::$pdo->prepare("INSERT INTO blog(title,content,is_show,user_id,created_at) VALUES (?,?,?,?,now())");
+            $ret = $stmt->execute([
+                $title,
+                $content,
+                $is_show,
+                $_SESSION['id'],
+            ]);
+                echo $_SESSION['id'];
+            if(!$ret){
+                echo "发表失败";
+                $error = $stmt->errorInfo();
+                echo "<pre>";
+                var_dump($error);
+                exit;
+            }
+            // 返回新插入的记录的ID
+            return self::$pdo->lastInsertId();
+        }
+
+        // 修改日志
+        public function find($id){
+            $stmt = self::$pdo->prepare('SELECT * FROM blog where id = ?');
+            $stmt->execute([
+                $id
+            ]);
+            // 取出数据
+            return $stmt->fetch();
+        }
+        // 处理修改的日志表
+       public function update($title,$content,$is_show,$id){
+            $stmt = self::$pdo->prepare("UPDATE blog SET title=?,content=?,is_show=? WHERE id=? ");
+            $ret = $stmt->execute([
+                $title,
+                $content,
+                $is_show,
+                $id,
+            ]);
+       }
+
+       //为某一个日志生成静态页
+       // 参数：日志ID
+       public function makeHtml($id){
+            // 1.取出日志的信息
+            $blog = $this->find($id);
+            // 2.打开缓冲区，并且加载视图到缓冲区
+            ob_start();
+            view('blogs.content',[
+                'blog'=>$blog
+            ]);
+            // 3.从缓冲区中取出视图并写到静态页中
+            $str  = ob_get_clean();
+            file_put_contents(ROOT.'public/contents/'.$id.'.html',$str);
+
+       }
+
+        // 删除静态页
+        public function deleteHtml($id){
+            // @ 防止 报错：有这个文件就删除，没有就不删除，不用报错
+            @unlink(ROOT.'public/contents/'.$id.'.html');
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 ?>
