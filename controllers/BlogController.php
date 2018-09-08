@@ -132,4 +132,22 @@ class BlogController
 
         message('修改成功',0,'/blog/index');
     }
+
+
+    // 显示私有日志
+    public function privateblog(){
+        // 1. 接收ID，并取出日志信息
+        $id = $_GET['id'];
+        $model = new Blog;
+        $blog = $model->find($id);
+
+        // 2. 判断这个日志是不是我的日志
+        if($_SESSION['id'] != $blog['user_id'])
+            die('无权访问！');
+
+        // 3. 加载视图
+        view('blogs.content', [
+            'blog' => $blog,
+        ]);
+    }
 }

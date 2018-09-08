@@ -6,6 +6,16 @@ ini_set('session.save_path', 'tcp://127.0.0.1:6379?database=3');  // 设置 redi
 // 开启 SESSION
 session_start();
 
+// 如果用户以 POST 方式访问网站时，需要验证令牌
+// if($_SERVER['REQUEST_METHOD'] == 'POST')
+// {
+//     if(!isset($_POST['_token']))
+//         die('违法操作！');
+
+//     if($_POST['_token'] != $_SESSION['token'])
+//         die('违法操作！');
+// }
+
 // 定义常量
 
 define('ROOT', dirname(__FILE__) . '/../');
@@ -133,6 +143,13 @@ function e($content)
         $_SESSION['token']=$token;
     }
     return $_SESSION['token'];
+}
+
+// 生成令牌隐藏域
+function csrf_field()
+{
+    $csrf = isset($_SESSION['token']) ? $_SESSION['token'] : csrf();
+    echo "<input type='hidden' name='_token' value='{$csrf}'>";
 }
 
 // 封装跳转 
