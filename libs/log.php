@@ -9,7 +9,7 @@
             // fopen (打开文件路径，打开文件的模式）：打开一个文件。
             // fwrite(内容)：向文件中写内容
 
-            $this->$fp = fopen(ROOT.'logs/'.$fileName.'.log'.'a');
+            $this->$fp = fopen(ROOT.'logs/'.$fileName.'.log','a');
         }
 
         // 向日志文件中追加内容

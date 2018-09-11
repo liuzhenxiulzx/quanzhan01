@@ -150,4 +150,5 @@ class BlogController
             'blog' => $blog,
         ]);
     }
+    
 }

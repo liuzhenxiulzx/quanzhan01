@@ -5,12 +5,13 @@ use Yansongda\Pay\Pay;
 
 class AlipayController
 {
+    // bfuioj4214@sandbox.com
     public $config = [
         'app_id' => '2016091700530943',
         // 通知地址
-        'notify_url' => 'http://requestbin.fullcontact.com/1cpzkjz1',
+        'notify_url' => 'http://lzx.tunnel.echomod.cn/alipay/notify',
         // 跳回地址
-        'return_url' => 'http://localhost:9999/alipay/return',
+        'return_url' => 'http://lzx.tunnel.echomod.cn/alipay/return',
         // 支付宝公钥
         'ali_public_key' => 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtVEj54bC2n5w2wHIthz8wkl0kiFXpvcHT3HLVRadZVVxLFi2tyWAVc8BZdYgfmHPaBYdkJYtv9IvGL0n6aHXDgW36cK37VNJjTcKcr2ZpemuvOHR9Dye/jpV1FTYswjlls8lDMfygIXfpkRUsOasRsFhXAmAugM+ypT0C7rPX2AYdIib7o91upkOdvVKGnuO03h5KByYz/IgdMh0OddadKWnKYN9ZSWqqy1RgP0b1MPoaHPb3wJech8P1GOLqYxAGc7IrF5fdnSeSiRCOecGQ8/J4KNsjq+LGhghbuyUUZs8TR773lcsk8j/RzebpgK3/wR2vHQvV/ncgYW1RBirhwIDAQAB',
         // 商户应用密钥
@@ -18,46 +19,78 @@ class AlipayController
         // 沙箱模式（可选）
         'mode' => 'dev',
     ];
+
+
     // 发起支付
     public function pay()
     {
-        $order = [
-            'out_trade_no' => time(),    // 本地订单ID
-            'total_amount' => '0.01',    // 支付金额
-            'subject' => '这是测试支付', // 支付标题
-        ];
-
-        $alipay = Pay::alipay($this->config)->web($order);
-
-        $alipay->send();
+        // 接收订单号
+        $sn = $_POST['sn'];
+        // 取出订单信息
+        $order = new \models\Order;
+        // 根据订单编号取出订单信息
+        $data = $order->payment($sn);
+        // 如果订单还未支付就跳到支付宝
+        if($data['status'] == 0){
+            // 跳转到支付宝
+            $alipay = Pay::alipay($this->config)->web([
+                'out_trade_no' => $sn,
+                'total_amount' => $data['money'],
+                'subject' => '智聊系统用户充值-'.$data['money'].'元',
+            ]);
+                $alipay->send();
+      
+        }else{
+            die('订单状态不允许支付');
+        }
     }
+
     // 支付完成跳回
     public function return()
     {
         $data = Pay::alipay($this->config)->verify(); // 是的，验签就这么简单！
-        echo '<h1>支付成功！</h1> <hr>';
+        echo '<h1>支付成功!!!</h1> <hr>';
         echo "<pre>";
         var_dump( $data->all() );
     }
+
+
     // 接收支付完成的通知
     public function notify()
     {
+        // 生成支付类的对象
         $alipay = Pay::alipay($this->config);
         try{
-            $data = $alipay->verify(); // 是的，验签就这么简单！
-            // 这里需要对 trade_status 进行判断及其它逻辑进行判断，在支付宝的业务通知中，只有交易通知状态为 TRADE_SUCCESS 或 TRADE_FINISHED 时，支付宝才会认定为买家付款成功。
-            // 1、商户需要验证该通知数据中的out_trade_no是否为商户系统中创建的订单号；
-            // 2、判断total_amount是否确实为该订单的实际金额（即商户订单创建时的金额）；
-            echo '订单ID：'.$data->out_trade_no ."\r\n";
-            echo '支付总金额：'.$data->total_amount ."\r\n";
-            echo '支付状态：'.$data->trade_status ."\r\n";
-            echo '商户ID：'.$data->seller_id ."\r\n";
-            echo 'app_id：'.$data->app_id ."\r\n";
+            
+            // 判断消息是否是支付宝发过来的，以及判断这个消息有没有被中途串改，如果改了就抛出异常
+            $data = $alipay->verify();  // 是的，验签就这么简单！
+        //    var_dump($data);
+        //    die;
+            if($data->trade_status == 'TRADE_SUCCESS' || $data->trade_status== 'TRADE_FINISHED'){
+
+                // 更新订单状态
+                $order = new \models\Order;
+                // 获取订单信息
+                $orderInfo  = $order->payment($data->out_trade_no);
+                // 如果订单的状态为未支付状态，说明是第一次收到消息，更新订单状态
+                if($orderInfo['status'] == 0 ){
+                    // 设置订单为已支付状态
+                    $order -> updataorder($data->out_trade_no);
+                    // 更新用户余额
+                    $user = new \models\User;
+                    $user->addmoney($orderInfo['money'],$orderInfo['user_id']);
+                    
+                    $fp = fopen(ROOT.'logs/pay.log','a');
+                    fwrite($fp,'成功'); 
+                }
+            }
+            
         } catch (\Exception $e) {
-            echo '失败：';
-            var_dump($e->getMessage()) ;
+            $fp = fopen(ROOT.'logs/pay.log','a');
+            fwrite($fp,'非法的消息'); 
+            die('非法的消息');
         }
-        // 返回响应
+        // 回应支付宝服务器（如何不回应，支付宝会一直重复给你通知）
         $alipay->success()->send();
     }
 
@@ -90,4 +123,43 @@ class AlipayController
             var_dump( $e->getMessage() );
         }
     }
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

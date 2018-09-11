@@ -21,6 +21,8 @@
     <a href="/blog/index">日志列表</a>
     <?php if(isset($_SESSION['id']) ): ?>
         <?=$_SESSION['email']?>
+        <a href="/user/recharge">充值</a>
+        <a href="/user/orders">充值列表</a>
         <a href="/blog/create">发表日志</a>
         <a href="/user/logout">退出</a>
     <?php else: ?>

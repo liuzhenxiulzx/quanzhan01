@@ -3,6 +3,7 @@ namespace controllers;
 
 // 引入模型类
 use models\User;
+use models\Order;
 
 class UserController
 {
@@ -141,14 +142,30 @@ class UserController
     //退出
     public function logout(){
         $_SESSION = [];
-        // die('退出成功！');
-        // view('common.success', [
-        //     'message' => '退出成功！',
-        //     'url' => '/blog/index',
-        //     'seconds' => '3'
-        // ]);
         message('退出成功！',0,'/blog/index');
     }
     
+    public function recharge(){
+        view('users.Recharge');
+    }
+
+    public function dorecharge(){
+        // 生成订单
+        $money = $_POST['money'];
+        $order = new Order;
+        $order->create($money);
+        message('充值订单已生成，请立即支付',2,'/user/orders');
+    }
+    
+    // 订单列表
+    public function orders()
+    {
+        $order = new Order;
+        // 搜索数据
+        $data = $order->search();
+
+        // 加载视图
+        view('users.order', $data);
+    }
 }
 ?>

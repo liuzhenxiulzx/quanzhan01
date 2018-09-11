@@ -37,6 +37,15 @@ class User extends Base
     }
 
 
+    // 为用户增加金额
+    public function addmoney($money,$userId){
+        
+        $stmt = self::$pdo->prepare("UPDATE users SET money=money+? WHERE id=?");
+        $stmt->execute([
+            $money,
+            $userId
+        ]);
+    }
 
 
 
