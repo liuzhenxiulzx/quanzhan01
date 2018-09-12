@@ -167,5 +167,17 @@ class UserController
         // 加载视图
         view('users.order', $data);
     }
+
+    // 查询用户余额
+    public function balance(){
+        $userId = $_SESSION['id'];
+
+        $user  = new User;
+        $data =  $user->selecmoney($userId);
+        view('users.balance', [
+            'data'=>$data['money']
+        ]);
+    }
 }
+
 ?>

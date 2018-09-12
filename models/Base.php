@@ -20,7 +20,28 @@
                     self::$pdo->exec('SET NAMES '.$config['charset']);
                 }
                 
-              
            }
-    }
+
+          //  开启事务
+           public function opentranct(){
+               self::$pdo -> exec('start transaction');
+           }
+        
+           //  提交事务
+           public function commits(){
+               self::$pdo -> exec('commit');
+           }
+
+           //回滚事务
+           public function back(){
+               self::$pdo -> exec('rollback');
+           }
+
+
+
+
+
+
+
+    }   
 ?>

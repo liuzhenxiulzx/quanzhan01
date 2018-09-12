@@ -63,9 +63,8 @@ class AlipayController
         try{
             
             // 判断消息是否是支付宝发过来的，以及判断这个消息有没有被中途串改，如果改了就抛出异常
-            $data = $alipay->verify();  // 是的，验签就这么简单！
-        //    var_dump($data);
-        //    die;
+            $data = $alipay->verify();  
+      
             if($data->trade_status == 'TRADE_SUCCESS' || $data->trade_status== 'TRADE_FINISHED'){
 
                 // 更新订单状态
@@ -74,14 +73,23 @@ class AlipayController
                 $orderInfo  = $order->payment($data->out_trade_no);
                 // 如果订单的状态为未支付状态，说明是第一次收到消息，更新订单状态
                 if($orderInfo['status'] == 0 ){
+                    // 开启事务
+                    $order -> opentranct();
+
                     // 设置订单为已支付状态
-                    $order -> updataorder($data->out_trade_no);
+                   $ret1 =  $order -> updataorder($data->out_trade_no);
                     // 更新用户余额
                     $user = new \models\User;
-                    $user->addmoney($orderInfo['money'],$orderInfo['user_id']);
-                    
+                   $ret2 =  $user->addmoney($orderInfo['money'],$orderInfo['user_id']);
+
+                   if($ret1 && $ret2){
+                       $order -> commits();
+                   }else{
+                       $order -> back();
+                   }
+
                     $fp = fopen(ROOT.'logs/pay.log','a');
-                    fwrite($fp,'成功'); 
+                    fwrite($fp,'成功'.'\r\n'); 
                 }
             }
             

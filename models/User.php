@@ -25,11 +25,12 @@ class User extends Base
             $email,
             $password
         ]);
-
+    
         $user = $stmt->fetch(\PDO::FETCH_ASSOC);
         if($user){
             $_SESSION['id']=$user['id'];
             $_SESSION['email'] = $user['email'];
+            $_SESSION['money'] = $user['money'];
             return true;
         }else{
             return false;
@@ -45,12 +46,25 @@ class User extends Base
             $money,
             $userId
         ]);
+        
+        // 更新session中的余额
+        // $_SESSION['money'] += $money;
     }
 
 
 
 
-
+    public function selecmoney($userId){
+        
+        $stmt = self::$pdo->prepare("SELECT money FROM users where id=?");
+        $stmt->execute([
+            $userId
+        ]);
+        $money = $stmt->fetch(\PDO::FETCH_ASSOC);
+        // var_dump($money);
+        // die;
+       return $money;
+    }
 
 
 
