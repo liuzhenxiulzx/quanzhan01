@@ -185,22 +185,25 @@ class UserController
         view('users.face');
     }
 
-    public function Agfaces(){;
+    public function Agfaces(){
+        $uploade =  \libs\Uploade::getuploads();
+       $path = $uploade->uploade('face','face');
+        echo $path;
         //图片存储根目录
-        $root = ROOT.'/public/uploads';
-        $date = date('Ymd');
-        //判断目录中是否有此文件，如果没有就创建
-        if(!is_dir($root.'/'.$date)){
-            mkdir($root.'/'.$date);
-        }
-        // 获取图片扩展名
-        $exction = strrchr($_FILES['face']['name'],'.');
-        // 生成唯一文件名
-        $name = md5(time().rand(1,9999));
-        //完整文件名
-        $allName = $root.'/'.$date.'/'.$name.$exction;
-        // 移动文件到指定目录
-        move_uploaded_file($_FILES['face']['tmp_name'],$allName);
+        // $root = ROOT.'/public/uploads';
+        // $date = date('Ymd');
+        // //判断目录中是否有此文件，如果没有就创建
+        // if(!is_dir($root.'/'.$date)){
+        //     mkdir($root.'/'.$date);
+        // }
+        // // 获取图片扩展名
+        // $exction = strrchr($_FILES['face']['name'],'.');
+        // // 生成唯一文件名
+        // $name = md5(time().rand(1,9999));
+        // //完整文件名
+        // $allName = $root.'/'.$date.'/'.$name.$exction;
+        // // 移动文件到指定目录
+        // move_uploaded_file($_FILES['face']['tmp_name'],$allName);
       
     }
 
