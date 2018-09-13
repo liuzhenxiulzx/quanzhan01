@@ -288,9 +288,12 @@
 
 
 
-
-
-
+        // 取出最新20条数据
+        public function getNew()
+        {
+            $stmt = self::$pdo->query('SELECT * FROM blog WHERE is_show=1 ORDER BY id DESC LIMIT 20');
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
 
 
 

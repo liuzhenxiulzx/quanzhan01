@@ -2,6 +2,8 @@
 namespace controllers;
 
 use models\Blog;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class BlogController
 {
@@ -27,6 +29,11 @@ class BlogController
     public function index2html(){
         $blog = new Blog;
         $blog->index2html();
+    }
+    // 取出最新20条数据
+    public function getnewblog(){
+        $blog = new Blog;
+        $blog->getNew();
     }
 
     public function display(){
@@ -151,4 +158,55 @@ class BlogController
         ]);
     }
     
+
+    // 生成excel 表
+    public function excel(){
+         // 获取当前标签页
+        $spreadsheet = new Spreadsheet();
+        // 获取当前工作
+        $sheet = $spreadsheet->getActiveSheet();
+        // 设置第一行内容
+        $sheet->setCellValue('A1', '标题');
+        $sheet->setCellValue('B1', '内容');
+        $sheet->setCellValue('C1', '发表时间');
+        $sheet->setCellValue('D1', '是发公开');
+        // 取出数据库中的日志
+        $model = new \models\Blog;
+        // 获取最新的20条日志
+        $blogs = $model->getNew();
+        $i = 2;
+        foreach($blogs as $v){
+            $sheet->setCellValue('A'.$i,$v['title']);
+            $sheet->setCellValue('B'.$i,$v['content']);
+            $sheet->setCellValue('C'.$i,$v['created_at']);
+            $sheet->setCellValue('D'.$i,$v['is_show']);
+            $i++;
+        }
+        $date = date('Ymd');
+        // 生成 excel 文件
+        $writer = new Xlsx($spreadsheet);
+        $writer->save(ROOT . 'excel/'.$date.'.xlsx');
+
+        // 下载excel
+        // 调用header函数 设置协议头 告诉浏览器开始下载文件
+
+        // 下载文件路径
+        $file = ROOT.'excel/'.$date.'.xlsx';
+        // 下载时文件名
+        $fileName = '最新20条日志'.$date.'.xlsx';
+        //告诉浏览器这是一个文件流格式的文件    
+        Header ( "Content-type: application/octet-stream" ); 
+        //请求范围的度量单位  
+        Header ( "Accept-Ranges: bytes" );  
+        //Content-Length是指定包含于请求或响应中数据的字节长度    
+        Header ( "Accept-Length: " . filesize ( $file ) );  
+        //用来告诉浏览器，文件是可以当做附件被下载，下载后的文件名称为$file_name该变量的值。
+        Header ( "Content-Disposition: attachment; filename=" . $fileName );    
+
+        // 读取并输出文件内容
+        readfile($file);
+
+    }   
+
+
 }
