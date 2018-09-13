@@ -185,11 +185,7 @@ class UserController
         view('users.face');
     }
 
-    public function Agfaces(){
-        // echo "<pre>";
-        // var_dump($_FILES);
-    
-        // echo $_FILES['face']['name'];
+    public function Agfaces(){;
         //图片存储根目录
         $root = ROOT.'/public/uploads';
         $date = date('Ymd');
