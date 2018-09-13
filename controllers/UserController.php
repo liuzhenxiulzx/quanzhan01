@@ -178,6 +178,117 @@ class UserController
             'data'=>$data['money']
         ]);
     }
+
+
+    // 设置头像
+    public function face(){
+        view('users.face');
+    }
+
+    public function Agfaces(){
+        // echo "<pre>";
+        // var_dump($_FILES);
+    
+        // echo $_FILES['face']['name'];
+        //图片存储根目录
+        $root = ROOT.'/public/uploads';
+        $date = date('Ymd');
+        //判断目录中是否有此文件，如果没有就创建
+        if(!is_dir($root.'/'.$date)){
+            mkdir($root.'/'.$date);
+        }
+        // 获取图片扩展名
+        $exction = strrchr($_FILES['face']['name'],'.');
+        // 生成唯一文件名
+        $name = md5(time().rand(1,9999));
+        //完整文件名
+        $allName = $root.'/'.$date.'/'.$name.$exction;
+        // 移动文件到指定目录
+        move_uploaded_file($_FILES['face']['tmp_name'],$allName);
+      
+    }
+
+    // 批量上传
+    public function allupload(){
+        view('users.batchup');
+    }
+
+    public function batch(){
+     
+        //图片存储根目录
+        $root = ROOT.'/public/uploads';
+        $date = date('Ymd');
+        //判断目录中是否有此文件，如果没有就创建
+        if(!is_dir($root.'/'.$date)){
+            mkdir($root.'/'.$date,0777);
+        }
+        // 循环五张图片的name
+        foreach($_FILES['Album']['name'] as $k => $v ){
+             // 获取图片扩展名
+            $exction = strrchr($k,'.');
+            // 生成唯一文件名
+            $name = md5(time().rand(1,9999));
+            //完整文件名
+            $allName = $name.$exction;
+            // 移动文件到指定目录
+            move_uploaded_file($_FILES['Album']['tmp_name'][$k],$root.'/'.$date.'/'.$allName);
+        }
+        
+        echo "上传成功";
+    }
+
+
+    // 大图上传-图片分割
+    public function uploadbig(){
+        // var_dump($_POST);
+        // var_dump($_FILES);
+        // 接收提交的数据
+        $count = $_POST['count']; //总的数量
+        $i = $_POST['i']; //当前是第几张
+        $size = $_POST['size'];//每块的大学
+        $name = "big_img_".$_POST['img_name']; //所有分快的名字
+
+        $img = $_FILES['img']; //图片
+        // 保存每个分片
+        move_uploaded_file( $img['tmp_name'] , ROOT.'tmp/'.$i );
+        $redis = \libs\Redis::getredis();
+        // 没上传一张就加一
+        $uploadcount = $redis->incr($name);
+        // 如果是最后一个分支就合并
+        if($uploadcount == $count){
+            // 以追回的方式创建并打开最终的大文件
+            $fp = fopen(ROOT.'public/uploads/big/'.$name.'.png','a');
+            // 循环所有的分片
+            for($i=0;$i<$count;$i++){
+                // 读取第i号文件并写到大文件中
+                fwrite($fp.file_get_contents(ROOT.'tmp/'.$i));
+                // 删除第i号临时文件
+                unlink(ROOT.'tmp/'.$i);
+            }
+            // 关闭文件
+            fclose($fp);
+            // 从redis中删除这个文件对应的编号这个变量
+            $redis->del($name);
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 ?>
