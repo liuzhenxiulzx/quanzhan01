@@ -19,7 +19,7 @@
         
         // 定义属性
 
-        private $root = ROOT.'/public/uploads'; //图片保存的一级目录
+        private $root = ROOT.'/public/uploads/'; //图片保存的一级目录
         private $exction = ['image/jpeg','image/jpg','image/png','image/gif','image/bmp','image/ejpeg'];
         private $maxsize = 1024*1024*1.8; //最大上传的尺寸
         private $file;  //保存用户上传的图片的信息
@@ -46,7 +46,7 @@
             // 生成唯一的名字
             $name = $this->makeName();
             // 移动图片
-            move_uploaded_file($this->file['tmp_name'],$this->root.'/'.$dir.$name);
+            move_uploaded_file($this->file['tmp_name'],$this->root.$dir.$name);
             // 返回二级目录开始的路径
             return $dir.$name;
 

@@ -10,11 +10,24 @@
           text-decoration: none; 
           font-weight: 600;  
           color:black;
-          padding-right: 15px;
+          padding-right: 10px;
         }
         a{
+            margin:10px;
            text-decoration: none; 
         }
+        h1{
+            width: 200px;
+            margin:10px;
+            padding-right: 0px;
+
+        }
+        img{
+            width: 80px;
+            height: 80px;
+            display: inline-block;
+        }
+      
     </style>
 </head>
 <body>
@@ -28,6 +41,8 @@
 
 
     <h1>智聊系统</h1>
+   
+   
     <a class="one" href="/">首页</a>
     <a class="one" href="/blog/index">日志列表</a>
     <?php if(isset($_SESSION['id']) ): ?>
@@ -44,6 +59,9 @@
         <a class="one" href="/user/regist">注册</a>
         <a class="one" href="/user/login">登录</a>
     <?php endif; ?>
+
+    
+    <img src="<?=$_SESSION['face']?>" />
     <hr> 
 
     

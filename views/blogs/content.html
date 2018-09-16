@@ -3,14 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <title><?=$blog['title']?></title>
+    <style>
+        .goodimg{
+            width:40px;
+            height:40px;
+
+        }
+        .agree-list {
+            border: 1px solid skyblue;
+            padding: 0;
+            text-align: center;
+        }
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 1px solid skyblue;
+            padding: 5px;
+            margin-left: 20px;
+        }
+        .agree-list h3 {
+            padding: 0;
+            margin-top: 0;
+            background-color: #EEE;
+            padding: 5px;
+        }
+        .face{
+            width:40px;
+            height:40px;
+        }
+    </style>
 </head>
 <body>
-
+    <!-- <?php view('common.nav')?> -->
     <h1><?=$blog['title']?></h1>
     <p>浏览量：<span id="display"></span></p>
     <p><?=$blog['content']?></p>
-    
-</body>
+    <img src="/images/good_up.png" alt="" id="btn_agree" class="goodimg">
+
+    <div class="agree-list">
+        <h3>点赞列表</h3>
+        <div id="avatar-list"></div>
+    </div>
+    <!-- <?php view('common.footer')?> -->
 </html>
 
 <script
@@ -37,4 +72,44 @@ $.ajax({
     }
 });
 
+
+$("#btn_agree").click(function(){
+    $.ajax({
+        type:"POST",
+        url:"/blog/good_up?id="+id,
+        dataType:"json",
+        success:function(data){
+            if(data.status_code == 200){
+                alert("成功");
+            }else{
+                alert(data.message);
+            }
+           
+        } 
+    });
+});
+
+
+$("#btn_agree").click(function(){
+    $.ajax({
+        type:"GET",
+        url:"/blog/good_uplist?id="+id,
+        dataType:"json",
+        success:function(data){
+            if(data.status_code == 200){
+                // alert("成功");
+                var html = "";
+                for(var i=0;i<data.data.length;i++){
+                    var face = data.data[i].face ? data.data[i].face : '/images/face.jpg';
+                    html += '<img title="'+data.data[i].email+'"class="face" src="'+face+'" alt="">';
+                }
+                // 把字符串放到页面
+                $("#avatar-list").html(html);
+            }else{
+                alert(data.message);
+            }
+           
+        } 
+    });
+});
 </script>

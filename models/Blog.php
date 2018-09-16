@@ -297,9 +297,45 @@
 
 
 
+        // 点赞
+        public function thumbs_up($id){
+            $stmt = self::$pdo->prepare('SELECT COUNT(*) from thumbs_up WHERE user_id = ? AND blog_id = ?');
+            $stmt->execute([
+                $_SESSION['id'],
+                $id,
+            ]);
+            $count = $stmt->fetch(PDO::FETCH_COLUMN);
+            if($count == 1){
+                return FALSE;
+            }
+
+            // 点赞
+            $stmt = self::$pdo->prepare("INSERT INTO thumbs_up (user_id,blog_id) VALUES (?,?)");
+            $ret = $stmt->execute([
+                $_SESSION['id'],
+                $id,
+            ]);
+            var_dump($stmt);
+            // 更新点赞数
+            $stmt = self::$pdo->prepare('UPDATE blog SET good_up = good_up+1 WHERE id = ?');
+            $ret = $stmt->execute([
+                $id,
+            ]);
+
+            return $ret;
+        }
 
 
+        // 获取点赞用户信息
+        public function gduplist($id){
+            $sql = 'SELECT b.id,b.email,b.face FROM thumbs_up a LEFT JOIN users b ON a.user_id = b.id WHERE a.blog_id = ?';
+            $stmt = self::$pdo -> prepare($sql);
+            $stmt->execute([
+                $id,
+            ]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        }
 
 
     }

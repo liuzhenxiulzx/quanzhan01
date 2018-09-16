@@ -208,5 +208,50 @@ class BlogController
 
     }   
 
+    // 点赞
+    public function good_up(){
+        // 获取日志ID
+        $id = $_GET['id'];
+        // echo $id;
+        // 判断是否登录
+        if(!isset($_SESSION['id'])){
+            echo json_encode([
+                'status_code' => '403',
+                'message'=>'必须先登录'
+            ]);
+            exit;
+        }
+
+        // 开始点赞
+        $blog = new \models\Blog;
+        $ret =  $blog->thumbs_up($id);
+        if($ret){
+            echo json_encode([
+                'status_code'=>'200',
+            ]);
+            exit;
+        }else{
+            echo json_encode([
+                'status_code'=>'403',
+                'message'=>'已经点赞过了'
+            ]);
+        }
+    }
+
+
+    // 点赞用户列表
+    public function good_uplist(){
+        $id = $_GET['id'];
+        // 获取这个日志所有点赞的用户
+        $blog = new \models\Blog;
+        $data = $blog->gduplist($id);
+
+        // 转成json返回
+        echo json_encode([
+            'status_code'=> 200,
+            'data'=>$data,
+        ]);
+    }
+
 
 }

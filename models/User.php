@@ -18,7 +18,7 @@ class User extends Base
                             ]);
     }
 
-// 登录
+    // 登录
     public function login($email,$password){
         $stmt = self::$pdo->prepare("select * from users where email = ? and password = ?");
         $stmt->execute([
@@ -31,6 +31,7 @@ class User extends Base
             $_SESSION['id']=$user['id'];
             $_SESSION['email'] = $user['email'];
             $_SESSION['money'] = $user['money'];
+            $_SESSION['face'] = $user['face'];
             return true;
         }else{
             return false;
@@ -68,7 +69,14 @@ class User extends Base
 
 
 
-
+    // 设置头像
+    public function setface($path){
+        $stmt = self::$pdo->prepare('UPDATE users SET face=? WHERE id=?');
+        $stmt->execute([
+            $path,
+            $_SESSION['id']
+        ]);
+    }
 
 
 
