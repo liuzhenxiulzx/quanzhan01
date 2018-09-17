@@ -80,6 +80,11 @@ class User extends Base
 
 
 
+    // 切换账号
+    public function getAll(){
+        $stmt = self::$pdo->query('SELECT * FROM users');
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 
 
 
