@@ -4,7 +4,7 @@ namespace controllers;
 // 引入模型类
 use models\User;
 use models\Order;
-
+use Intervention\Image\ImageManagerStatic as Image;
 class UserController
 {
     public function hello()
@@ -187,7 +187,14 @@ class UserController
 
     public function Agfaces(){
         $uploade =  \libs\Uploade::getuploads();
-        $path = $uploade->uploade('face','face');
+        $path = $uploade->uploade('face','face');   //face/20180917/15e3fa16a64ee06c0ed42c1466f08a43.jpeg
+        // 裁切图片
+        $image = Image::make(ROOT.'public/uploads/'.$path);
+        
+        // 注意：Crop 参数必须是整数，所以需要转成整数：(int)
+        $image->crop((int)$_POST['w'],(int)$_POST['h'],(int)$_POST['x'],(int)$_POST['y']);
+        // 保存时覆盖原图
+        $image->save(ROOT.'public/uploads/'.$path);
 
         // 调用模型 保存新的头像
         $user = new \models\User;
@@ -200,7 +207,7 @@ class UserController
         $_SESSION['face'] = '/uploads/'.$path;
 
 
-        message('设置成功',2,'/blog/index');
+        // message('设置成功',2,'/blog/index');
       
     }
 

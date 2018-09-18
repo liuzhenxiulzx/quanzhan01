@@ -5,11 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>设置头像</title>
+    <style>
+        #image{
+            width: 300px;
+            height: 300px;
+        }
+        .img-container {
+            width: 500px;
+            height: 500px;
+            float:left;
+        }
+        .img-preview {
+            float: left;
+            overflow: hidden;
+            margin-left: 20px;
+        }
+        .preview-lg {
+            width: 240px;
+            height: 240px;
+        }
+        .preview-md {
+            width: 80px;
+            height: 80px;
+        }
+    </style>
 </head>
 <body>
     <?php view('common.nav') ?>
     <h1>设置头像</h1>
     <form action="/user/Agfaces" method="post" enctype="multipart/form-data">
+        <?=csrf_field()?>
+
+        <!-- 显示原图 -->
+        <div class="img-container">
+            <img id="image" src="" alt="Picture">
+        </div>
+        <!-- 预览图片 -->
+        <div class="docs-preview clearfix">
+            <div class="img-preview peview-lg"></div>
+            <div class="img-preview preview-md"></div>
+        </div>
+
         <div>
            头像:
             <input id="imgs" type="file" name="face">
@@ -17,47 +53,115 @@
         <div>
             <input type="submit" value="上传">
         </div>
+
+        <!-- 保存裁切时的区域信息 -->
+        <input type="text" name="x" id="x">
+        <input type="text" name="y" id="y">
+        <input type="text" name="w" id="w">
+        <input type="text" name="h" id="h">
+
     </form>
+    <div style="clear: both;"></div>
     <?php view('common.footer') ?>
 </body>
 </html>
-<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="/cropper/cropper.min.js"></script>
+<!-- <script src="/simditor-2.3.6/scripts/jquery.min.js"></script> -->
+<link rel="stylesheet" href="/cropper/cropper.min.css">
 <script>
-    var img = document.getElementById('imgs');
-    img.onchange = function(){
-        // 获取第一张图片       
-        var oneimg = this.files[0];
-        // 获取这张图片的尺寸
-        var size = oneimg.size;
-        // 每块的尺寸
-        var perSize = 4096;
-        // 计算总的快数
-        var count  = Math.ceil(size/perSize);
-        // 为所有分片生成一个随机的唯一的名字
-        var name = "img_"+Math.random(1,99999);
-                console.log(name);
-        for(var i=0;i<count;i++){
-            var allimg = oneimg.slice(i*perSize,i*perSize+perSize);
-            // 创建一个FormData对象
-            var objs  = new FormData();
-            // 添加到表单中
-            objs.append('img',allimg) //图片数据
-            objs.append('count',count)// 总的快数
-            objs.append('i',i) //当前图片是第几块
-            objs.append('size',perSize) //每块尺寸
-            objs.append('img_name',name) //名字
-            // 上传的服务器
-            $.ajax({
-                type:"POST",
-                url:"/user/uploadbig",
-                data:objs,
-                contentType:false,
-                processData:false,
-                success:function(data){
 
-                }
-            });
+    // var img = document.getElementById('imgs');
+    // img.onchange = function(){
+    //     // 获取第一张图片       
+    //     var oneimg = this.files[0];
+    //     // 获取这张图片的尺寸
+    //     var size = oneimg.size;
+    //     // 每块的尺寸
+    //     var perSize = 4096;
+    //     // 计算总的快数
+    //     var count  = Math.ceil(size/perSize);
+    //     // 为所有分片生成一个随机的唯一的名字
+    //     var name = "img_"+Math.random(1,99999);
+    //             console.log(name);
+    //     for(var i=0;i<count;i++){
+    //         var allimg = oneimg.slice(i*perSize,i*perSize+perSize);
+    //         // 创建一个FormData对象
+    //         var objs  = new FormData();
+    //         // 添加到表单中
+    //         objs.append('img',allimg) //图片数据
+    //         objs.append('count',count)// 总的快数
+    //         objs.append('i',i) //当前图片是第几块
+    //         objs.append('size',perSize) //每块尺寸
+    //         objs.append('img_name',name) //名字
+    //         // 上传的服务器
+    //         $.ajax({
+    //             type:"POST",
+    //             url:"/user/uploadbig",
+    //             data:objs,
+    //             contentType:false,
+    //             processData:false,
+    //             success:function(data){
 
+    //             }
+    //         });
+
+    //     }
+    // }
+
+
+
+
+    // 选中图片
+    var $image = $('#image');
+
+    // 获取四个框
+    var x = $("#x")
+    var y = $("#y")
+    var w = $("#w")
+    var h = $("#h")
+
+    // 当选中图片时触发函数
+    $("#imgs").change(function(){
+
+        // 把选中的图片转成字符串
+        // this.files 当前选中的图片数组
+        var url = getObjectUrl(this.files[0]);
+        // console.log(url);
+
+        // 把图片的地址设置到 img 标签 src 属性上
+        $image.attr('src',url);
+        
+        // 先销毁原来的插件
+        $image.cropper("destroy");
+
+        /* 启动 cropper 插件 */
+        $image.cropper({
+            aspectRatio: 1,                              // 缩略图1:1的比例
+            preview:'.img-preview',                      // 显示缩略图的框
+            viewMode:3,                                  // 显示模式
+            // 裁切时触发事件
+            crop: function(event) {
+                x.val(event.detail.x);             // 裁切区域左上角x坐标
+                y.val(event.detail.y);             // 裁切区域左上角y坐标
+                w.val(event.detail.width);         // 裁切区域宽高
+                h.val(event.detail.height);        // 裁切区域高度
+            }
+        })
+
+    });
+
+
+
+    // 预览时需要使用下面这个函数转换一下(为了兼容不同的浏览器，所以要判断支持哪一种函数就使用哪一种)
+    function getObjectUrl(file) {
+        var url = null;
+        if (window.createObjectURL != undefined) {
+            url = window.createObjectURL(file)
+        } else if (window.URL != undefined) {
+            url = window.URL.createObjectURL(file)
+        } else if (window.webkitURL != undefined) {
+            url = window.webkitURL.createObjectURL(file)
         }
+        return url
     }
 </script>
