@@ -207,7 +207,7 @@ class UserController
         $_SESSION['face'] = '/uploads/'.$path;
 
 
-        // message('设置成功',2,'/blog/index');
+        message('设置成功',2,'/blog/index');
       
     }
 

@@ -72,6 +72,7 @@ class User extends Base
     // 设置头像
     public function setface($path){
         $stmt = self::$pdo->prepare('UPDATE users SET face=? WHERE id=?');
+        
         $stmt->execute([
             $path,
             $_SESSION['id']
