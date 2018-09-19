@@ -279,6 +279,13 @@ class UserController
 
 
 
+    // 取出活跃用户
+    public function setActiveUser(){
+        $user = new User;
+        $user->Activeuser();
+
+    }
+
 
 
 

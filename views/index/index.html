@@ -30,7 +30,14 @@
         <?php endforeach; ?>
     </ul>
 
-    
+    <h1>活跃用户</h1>
+    <ul>
+        <?php foreach($users as $v): ?>
+        <li>
+            <img size="50" height="50" src="<?=$v['face']?>" title="<?=$v['email']?>" alt="">
+        </li>
+        <?php endforeach; ?>
+    </ul>
 
     <?php view('common.footer') ?>
 </body>
