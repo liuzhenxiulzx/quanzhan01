@@ -1,11 +1,16 @@
 <?php
 namespace controllers;
-
+use models\Blog;
 class IndexController
 {
-    public function index()
-    {
-        view('common.nav');
+
+    // 取出最新20条数据
+    public function index(){
+        $blog = new Blog;
+        $data = $blog->getNew();
+        view('index.index',[
+            'blogs'=>$data
+        ]);
     }
 }
 

@@ -5,9 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>首页</title>
+    <style>
+        li{
+            line-height: 30px;
+        }
+       #title{
+           width: 300px;
+       }
+    </style>
 </head>
 <body>
-    <h1>最新发表的日志</h1>
+    <?php view('common.nav') ?> 
+
+
+    <h1 id="title">最新发表的日志</h1>
     <ul>
        <?php foreach($blogs as $v): ?>
        
@@ -18,5 +29,9 @@
             </li>
         <?php endforeach; ?>
     </ul>
+
+    
+
+    <?php view('common.footer') ?>
 </body>
 </html>
