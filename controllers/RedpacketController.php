@@ -12,7 +12,7 @@
             $key = 'redbag_'.date('Ymd');
             $redis->sadd($key,'-1');
             // 设置过期
-            $redis->expire($key,3900);
+            $redis->expire($key,3900);  
         }
 
         // 监听队列 当有新的数据时就生成订单

@@ -32,6 +32,71 @@
             width:40px;
             height:40px;
         }
+        /* 评论 */
+        .pinglun{
+            width: 83%;
+            border: 1px solid #e8e8e8;
+            padding: 4px;
+            border-radius: 5px;
+            margin-left: 8%;
+            position: relative;
+            margin-top: 30px;
+            margin-bottom: 25px;
+            background-color:#fafafa;
+        }
+        .tx{
+            position: absolute;
+            top: 10px;
+            left: -70px;
+            width: 55px;
+            height: 50px;
+        }
+        ul{
+            padding: 0px 20px;
+            line-height: 26px;
+        }
+        .plbg{
+            background-color: #cccccc;
+            border-bottom: 1px dotted #DCDCDC;
+        }
+        .name{
+            font-size: 13px;
+            float: left;
+            margin-top: -22px;
+        }
+        .r{
+            float: right;
+        }
+        .dr{
+            clear: right;
+        }
+        .pull{
+            word-wrap: break-word;
+            width: 100%;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            font-size: 14px;
+            background-color: #fafafa;
+        }
+        .pull p{
+            padding: 0px;
+            margin: 0px;
+            line-height: 26px;
+        }
+        .hf{
+            float: right;
+            font-size: 12px;
+            color: #5d6c80;
+            text-decoration: none;
+            cursor: pointer;
+            line-height: 26px;
+            margin-top: -27px;
+        }
+        form{
+            position: relative;
+            top: 10px;
+            left: 120px;
+        }
     </style>
 </head>
 <body>
@@ -45,13 +110,41 @@
         <h3>点赞列表</h3>
         <div id="avatar-list"></div>
     </div>
+
+    <!-- 评论 -->
+<div id="comment_app">
+    <h3>评论列表：</h3>
+    <div class="pinglun" v-for="(v,k) in comments">
+        <!-- 头像 -->
+        <img :src="v.face" alt="" class="tx">
+        <ul class="plbg">
+            <div class="name">{{v.email}}</div>
+            <div class="r"><span class="name">{{v.created_at}}</span></div>
+        </ul>
+        <ul class="plul">
+            <p>{{v.content}}</p>
+            <a class="hf">回复</a>
+        </ul>
+    </div>
+
+    <form action="">
+        <textarea v-model="content" cols="60" rows="8"></textarea>
+        <br>
+        <input @click="submit" type="submit" value="发表评论">
+    </form>
+</div>
+
+
     <!-- <?php view('common.footer')?> -->
 </html>
 
 <script
   src="https://code.jquery.com/jquery-3.3.1.min.js"
   integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-  crossorigin="anonymous"></script>
+  crossorigin="anonymous">
+</script>
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
 <script>
 // 更新和获取游览量
@@ -112,4 +205,56 @@ $("#btn_agree").click(function(){
         } 
     });
 });
+</script>
+<script>
+    new Vue({
+        // 挂载
+        el:"#comment_app",
+        // 定义数据
+        data:{
+            content:'',
+            blog_id:"<?=$blog['id']?>",
+            comments:[]
+        },
+         // 在创建完vue之后执行
+         created:function(){
+            // 初始化数据
+            axios.get('/comment/comment_list?id='+id).then(res => {
+                if(res.data.status_code == 200){
+                    // 把服务器返回的数据放到绑定的数组上，会自动更新到页面
+                    this.comments = res.data.data
+                }
+            });
+
+        },
+        // 定义数据
+        methods:{
+            submit:function(){
+                // 执行ajax发表评论  
+                axios.post('/Comment/comments',{
+
+                    content:this.content,
+                    blog_id:this.blog_id
+
+                })
+                .then( res => {
+
+                    if(res.data.status_code == '200' ){
+                        // 把新发表的数据添加到数组中
+                        this.comments.unshift({
+                            email:res.data.email,
+                            face:res.data.face,
+                            content:res.data.content,
+                            created_at:res.data.created_at,
+                        });
+                        // 清空数据
+                        this.content = '';
+                    }else{
+                        alert(res.data.message);
+                    }
+                    
+                });
+            }
+        }
+    });
 </script>
